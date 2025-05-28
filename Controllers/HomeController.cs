@@ -1,35 +1,35 @@
 using Microsoft.AspNetCore.Mvc;
-using Project_VP.Models; // Make sure this matches your namespace
-using System.Collections.Generic;
-using System.Linq;
+using Project_VP.Models;
+using Microsoft.EntityFrameworkCore;
+using System.Threading.Tasks;
 
 namespace Project_VP.Controllers
 {
     public class HomeController : Controller
     {
-        // Static list of products to act like a mini database
-        private static List<Product> products = new List<Product>
-        {
-            new Product { Id = 1, Name = "Laptop", Price = 450.00m },
-            new Product { Id = 2, Name = "Mouse", Price = 15.99m },
-            new Product { Id = 3, Name = "Keyboard", Price = 29.50m },
-            new Product { Id = 4, Name = "Monitor", Price = 120.00m }
-        };
+        private readonly AppDbContext _context;
 
-        // Cart to store selected items
-        private static List<Product> cart = new List<Product>();
-
-        // Show products
-        public IActionResult Index()
+        // Inject AppDbContext
+        public HomeController(AppDbContext context)
         {
+            _context = context;
+        }
+
+        // Show products from database
+        public async Task<IActionResult> Index()
+        {
+            var products = await _context.Products.ToListAsync();
             return View(products);
         }
 
-        // Add to cart
+        // Cart - keep as it is for now (if you want to make it dynamic, we can modify later)
+        private static List<Product> cart = new List<Product>();
+
         [HttpPost]
         public IActionResult AddToCart(int id)
         {
-            var product = products.FirstOrDefault(p => p.Id == id);
+            // For now, get product from DB synchronously for simplicity
+            var product = _context.Products.Find(id);
             if (product != null)
             {
                 cart.Add(product);
@@ -37,13 +37,11 @@ namespace Project_VP.Controllers
             return RedirectToAction("Index");
         }
 
-        // View cart
         public IActionResult Cart()
         {
             return View(cart);
         }
 
-        // Checkout
         public IActionResult Checkout()
         {
             cart.Clear();

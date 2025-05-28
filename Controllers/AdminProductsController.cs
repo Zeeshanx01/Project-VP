@@ -5,45 +5,29 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Project_VP.Controllers
 {
-    public class ProductsController : Controller
+    public class AdminProductsController : Controller
     {
         private readonly AppDbContext _context;
 
-        public ProductsController(AppDbContext context)
+        public AdminProductsController(AppDbContext context)
         {
             _context = context;
         }
 
-        // GET: Products
+        // GET: AdminProducts
         public async Task<IActionResult> Index()
         {
             var products = await _context.Products.ToListAsync();
             return View(products);
         }
 
-        // Optional: Add a Details view for product info
-        // GET: Products/Details/5
-        public async Task<IActionResult> Details(int? id)
+        // GET: AdminProducts/Create
+        public IActionResult Create()
         {
-            if (id == null)
-                return NotFound();
-
-            var product = await _context.Products
-                .FirstOrDefaultAsync(p => p.Id == id);
-
-            if (product == null)
-                return NotFound();
-
-            return View(product);
+            return View();
         }
 
-        // Remove or comment out Create, Edit, Delete actions below to disable management on this controller
-
-        /*
-        // GET: Products/Create
-        public IActionResult Create() { return View(); }
-
-        // POST: Products/Create
+        // POST: AdminProducts/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(Product product)
@@ -57,21 +41,24 @@ namespace Project_VP.Controllers
             return View(product);
         }
 
-        // GET: Products/Edit/5
+        // GET: AdminProducts/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null) return NotFound();
+
             var product = await _context.Products.FindAsync(id);
             if (product == null) return NotFound();
+
             return View(product);
         }
 
-        // POST: Products/Edit/5
+        // POST: AdminProducts/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, Product product)
         {
             if (id != product.Id) return NotFound();
+
             if (ModelState.IsValid)
             {
                 try
@@ -81,7 +68,7 @@ namespace Project_VP.Controllers
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!_context.Products.Any(e => e.Id == id)) return NotFound();
+                    if (!ProductExists(product.Id)) return NotFound();
                     else throw;
                 }
                 return RedirectToAction(nameof(Index));
@@ -89,16 +76,18 @@ namespace Project_VP.Controllers
             return View(product);
         }
 
-        // GET: Products/Delete/5
+        // GET: AdminProducts/Delete/5
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null) return NotFound();
-            var product = await _context.Products.FirstOrDefaultAsync(m => m.Id == id);
+
+            var product = await _context.Products.FirstOrDefaultAsync(p => p.Id == id);
             if (product == null) return NotFound();
+
             return View(product);
         }
 
-        // POST: Products/Delete/5
+        // POST: AdminProducts/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
@@ -111,6 +100,10 @@ namespace Project_VP.Controllers
             }
             return RedirectToAction(nameof(Index));
         }
-        */
+
+        private bool ProductExists(int id)
+        {
+            return _context.Products.Any(e => e.Id == id);
+        }
     }
 }
